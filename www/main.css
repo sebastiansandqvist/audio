@@ -1,4 +1,259 @@
+:root {
+  --control-area-height: 60px;
+  --sidebar-width: 250px;
+  --font-size: 12px;
+}
+
+::placeholder {
+  color: #8699b5;
+}
+
+::selection {
+  background: #00a9ff;
+  color: white;
+}
+
 body {
-  padding: 0;
+  color: #171d25;
+  font: 400 var(--font-size)/1 'Open Sans', sans-serif;
   margin: 0;
+  padding: 0;
+}
+
+button, select, input {
+  color: #171d25;
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+input[type="number"] {
+  -webkit-appearance: textfield;
+     -moz-appearance: textfield;
+          appearance: textfield;
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+}
+
+/*
+  Layout
+*/
+
+.App {
+  background: red;
+}
+
+.Header {
+  background: white;
+  box-shadow: 0 0 4px #c5cfdc;
+  box-sizing: border-box;
+  height: var(--control-area-height);
+  padding: 0 20px;
+  z-index: 1;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  position: fixed;
+  top: 0;
+  right: var(--sidebar-width);
+  bottom: auto;
+  left: 0;
+}
+
+.Sidebar {
+  background: #171d25;
+  box-sizing: border-box;
+  color: white;
+  /*padding: 20px;*/
+  width: var(--sidebar-width);
+  z-index: 2;
+
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: auto;
+}
+
+.Editor {
+  background: #e5e9ef;
+  position: fixed;
+  top: var(--control-area-height);
+  right: var(--sidebar-width);
+  bottom: var(--control-area-height);
+  left: 0;
+}
+
+.Controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  background: white;
+  box-shadow: 0 0 4px #c5cfdc;
+  box-sizing: border-box;
+  height: var(--control-area-height);
+
+  position: fixed;
+  top: auto;
+  right: var(--sidebar-width);
+  bottom: 0;
+  left: 0;
+}
+
+
+
+/*
+  Sidebar
+*/
+
+.Sidebar-heading {
+  display: block;
+  background: #0d1115;
+  box-sizing: border-box;
+  height: var(--control-area-height);
+  color: white;
+  font-weight: 600;
+  letter-spacing: 2px;
+  line-height: var(--control-area-height);
+  text-align: center;
+  text-transform: uppercase;
+}
+
+
+/*
+  Header
+*/
+
+input.Header-title {
+  background: white;
+  border: 0;
+  height: 100%;
+  outline: 0;
+  padding: 0;
+  min-width: 200px;
+}
+
+select {
+  background: white;
+  border: 1px solid #c5cfdc;
+  border-radius: 3px;
+  outline: 0;
+}
+
+select:focus {
+  border: 1px solid #00a9ff;
+}
+
+
+/*
+  Tempo
+*/
+
+
+.Tempo-input {
+  border: 0;
+  outline: 0;
+  padding: 0;
+  text-align: right;
+  width: 3ch;
+}
+
+.Tempo-label {
+  color: #8699b5;
+}
+
+.Tempo-controls {
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  height: var(--control-area-height);
+}
+
+.Tempo-controls button {
+  background: white;
+  border: 0;
+  height: 8px;
+  overflow: hidden;
+  padding: 0;
+}
+
+.Tempo-controls button .Icon {
+  fill: #8699b5;
+}
+
+.Tempo-controls button:hover .Icon {
+  fill: #00a9ff;
+}
+
+/*.beat-number {
+  color: #677fa1;
+}
+.beat-number:focus {
+  color: #0098e6;
+}
+
+.beat-label {
+}
+*/
+/*
+  Sidebar
+*/
+
+.Sidebar a {
+  background: #0d1115;
+  box-sizing: border-box;
+  border-radius: 3px;
+  display: block;
+  color: white;
+  margin-bottom: 10px;
+  padding: 10px;
+  text-decoration: none;
+  width: 100%;
+}
+
+.Sidebar a.active {
+  background: #0098e6;
+  cursor: default;
+}
+
+/*
+  Controls
+*/
+
+button.Control-play {
+  background: #f2f4f7;
+  border: 0;
+  border-right: 1px solid #e5e9ef;
+  color: #00a9ff;
+  outline: 0;
+  height: var(--control-area-height);
+  width: var(--control-area-height);
+}
+
+
+/*
+  Utilities
+*/
+
+.pad20 {
+  padding: 20px;
+}
+
+.mT10 {
+  margin-top: 10px;
+}
+
+.mT20 {
+  margin-top: 20px;
+}
+
+.float-right {
+  float: right;
 }

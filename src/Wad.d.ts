@@ -80,6 +80,7 @@ declare module 'web-audio-daw' {
 
   class Wad {
     constructor(args: ConstructorArgs);
+    public static audioContext: AudioContext;
     play: (args?: PlayArgs) => Promise<this>;
     stop: (label?: string) => void;
     pause: (label?: string) => void;
