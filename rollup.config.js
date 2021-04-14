@@ -32,7 +32,6 @@ export default {
           `    <meta charset="utf-8">\n` +
           `    <title>${title}</title>\n` +
           `    <link href="http://fonts.googleapis.com/css?family=Open+Sans:400,600" rel="stylesheet" type="text/css">\n` +
-          `    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">\n` +
           `    <link rel="stylesheet" href="/main.css">\n` +
           `  </head>\n` +
           `  <body>\n` +

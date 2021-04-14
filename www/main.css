@@ -2,6 +2,8 @@
   --control-area-height: 60px;
   --sidebar-width: 250px;
   --font-size: 12px;
+  --grid: 15px;
+  --blue: #00a9ff;
 }
 
 ::placeholder {
@@ -9,7 +11,7 @@
 }
 
 ::selection {
-  background: #00a9ff;
+  background: var(--blue);
   color: white;
 }
 
@@ -88,6 +90,7 @@ input[type="number"]::-webkit-outer-spin-button {
   right: var(--sidebar-width);
   bottom: var(--control-area-height);
   left: 0;
+  overflow: auto;
 }
 
 .Controls {
@@ -148,7 +151,7 @@ select {
 }
 
 select:focus {
-  border: 1px solid #00a9ff;
+  border: 1px solid var(--blue);
 }
 
 
@@ -189,19 +192,11 @@ select:focus {
 }
 
 .Tempo-controls button:hover .Icon {
-  fill: #00a9ff;
+  fill: var(--blue);
 }
 
-/*.beat-number {
-  color: #677fa1;
-}
-.beat-number:focus {
-  color: #0098e6;
-}
 
-.beat-label {
-}
-*/
+
 /*
   Sidebar
 */
@@ -223,19 +218,90 @@ select:focus {
   cursor: default;
 }
 
+
+/*
+  Editor
+*/
+.Editor {
+  overflow: auto;
+}
+
+.Editor canvas {
+}
+
+/*
+.Editor table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  table-layout: fixed;
+}
+
+.Editor table td.pitch {
+  border: 0;
+  box-sizing: border-box;
+  color: #677fa1;
+  font-family: monospace;
+  font-weight: 200;
+  line-height: var(--grid);
+  min-width: var(--control-area-height);
+  text-align: left;
+  padding-left: 20px;
+}
+
+.Editor table td.note {
+  height: var(--grid);
+  width: var(--grid);
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+  background: #c5cfdc;
+  border: 4px solid #e5e9ef;
+  border-left: 0;
+  text-align: center;
+}
+
+.Editor table td.note button {
+  background: transparent;
+  border: 0;
+  height: var(--grid);
+  padding: 0;
+  width: var(--grid);
+}
+
+.Editor table td.note.active {
+  background: var(--blue);
+}*/
+
 /*
   Controls
 */
 
-button.Control-play {
+.Controls button.Control-play {
   background: #f2f4f7;
   border: 0;
   border-right: 1px solid #e5e9ef;
-  color: #00a9ff;
   outline: 0;
   height: var(--control-area-height);
   width: var(--control-area-height);
 }
+
+.Controls button.Control-play .Icon {
+  /*fill: #516684;*/
+  fill: #171d25;
+}
+
+.Controls button.Control-play:hover .Icon {
+  fill: var(--blue);
+}
+
+.Controls .button {
+  background: white;
+  border: 1px solid #c5cfdc;
+  border-radius: 3px;
+  padding: 5px 10px;
+}
+
 
 
 /*
@@ -248,6 +314,14 @@ button.Control-play {
 
 .mT10 {
   margin-top: 10px;
+}
+
+.mR10 {
+  margin-right: 10px;
+}
+
+.mR20 {
+  margin-right: 20px;
 }
 
 .mT20 {
