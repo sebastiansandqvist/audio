@@ -4,27 +4,27 @@ import * as song from '../song';
 type Song = song.T;
 
 interface SidebarProps {
-  songs: Song[];
+  songs: { [key: string]: Song };
   activeSong: Song;
-  setActiveSong: (song: Song) => void;
+  setActiveSongId: (id: string) => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ songs, activeSong, setActiveSong }) => {
+const Sidebar: React.FC<SidebarProps> = ({ songs, activeSong, setActiveSongId }) => {
   return <>
     <aside className="Sidebar">
       <div className="Sidebar-heading">Songs</div>
       <div className="pad20">
-      {songs.map((song) => (
+      {Object.keys(songs).map((songId) => (
         <a
-          className={activeSong.id === song.id ? 'active' : ''}
+          className={activeSong.id === songId ? 'active' : ''}
           href="#"
-          key={song.id}
+          key={songId}
           onClick={(event) => {
             event.preventDefault();
-            setActiveSong(song);
+            setActiveSongId(songId);
           }}
         >
-            {song.title || 'Untitled'}
+            {songs[songId].title || 'Untitled'}
         </a>
       ))}
       </div>

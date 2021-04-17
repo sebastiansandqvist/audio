@@ -1,7 +1,10 @@
 declare const React: typeof import('react');
+declare const Wad: typeof import('web-audio-daw');
 import * as song from '../song';
+import * as instrument from '../instrument';
 
 type Song = song.T;
+type Instrument = instrument.T;
 
 
 const scale = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B'];
@@ -20,7 +23,16 @@ const fullScaleToYCoord: { [key: string]: number } = {};
 })();
 
 
+function playPreviewNote(pitch: string, instrument: Instrument) {
+  instrument.wad.play({
+    pitch,
+    env: { hold: 0.1 }
+  });
+}
+
+
 interface EditorProps {
+  activeSongId: string;
   song: Song;
   updateSong: (song: Song) => void;
 }
@@ -47,12 +59,13 @@ interface Coordinate {
   y: number;
 }
 
-const Editor: React.FC<EditorProps> = ({ song, updateSong }) => {
+const Editor: React.FC<EditorProps> = ({ activeSongId, song, updateSong }) => {
   const X_OFFSET = 60;
-  const Y_OFFSET = 10;
-  const ROW_HEIGHT = 20;
-  const ROW_WIDTH = 20;
-  const PADDING = 4;
+  const Y_OFFSET = 7;
+  const ROW_HEIGHT = 15;
+  const ROW_WIDTH = 15;
+  const Y_FIX = ROW_HEIGHT; // magic offset # to handle rounding errors when determining which cell is hovered
+  const PADDING = 2;
 
   const [hoveredX, setHoveredX] = React.useState(-1);
   const [hoveredY, setHoveredY] = React.useState(-1);
@@ -67,15 +80,12 @@ const Editor: React.FC<EditorProps> = ({ song, updateSong }) => {
     let x = 0;
     let y = 0;
 
-    // let priorX = -1;
-    // let priorY = -1;
-
     const paint = (event: MouseEvent) => {
       const newX = event.offsetX - canvas.offsetLeft;
       const newY = event.offsetY - canvas.offsetTop;
 
-      const xCoord = Math.round(newX / (ROW_WIDTH + PADDING)) - 3;
-      const yCoord = Math.round(newY / (ROW_HEIGHT + PADDING)) - 1;
+      const xCoord = Math.round(newX / (ROW_WIDTH + PADDING)) - Math.round(X_OFFSET / ROW_WIDTH);
+      const yCoord = Math.round(newY / (ROW_HEIGHT + PADDING)) - Math.round(Y_FIX / ROW_HEIGHT);
 
       if (xCoord < 0 || yCoord < 0) return;
 
@@ -94,6 +104,9 @@ const Editor: React.FC<EditorProps> = ({ song, updateSong }) => {
             pitch,
             duration: 1
           });
+          if (song.instrumentId in instrument.defaults) {
+            playPreviewNote(pitch, instrument.defaults[song.instrumentId]);
+          }
           updateSong({ ...song });
         }
       }
@@ -107,8 +120,8 @@ const Editor: React.FC<EditorProps> = ({ song, updateSong }) => {
       x = event.offsetX - canvas.offsetLeft;
       y = event.offsetY - canvas.offsetTop;
 
-      const xCoord = Math.round(x / (ROW_WIDTH + PADDING)) - 3;
-      const yCoord = Math.round(y / (ROW_HEIGHT + PADDING)) - 1;
+      const xCoord = Math.round(x / (ROW_WIDTH + PADDING)) - Math.round(X_OFFSET / ROW_WIDTH);
+      const yCoord = Math.round(y / (ROW_HEIGHT + PADDING)) - Math.round(Y_FIX / ROW_HEIGHT);
 
       if (xCoord < 0 || yCoord < 0) return;
 
@@ -121,6 +134,9 @@ const Editor: React.FC<EditorProps> = ({ song, updateSong }) => {
             pitch,
             duration: 1
           });
+          if (song.instrumentId in instrument.defaults) {
+            playPreviewNote(pitch, instrument.defaults[song.instrumentId]);
+          }
         }
         else {
           // clicking an already existing note will toggle it off
@@ -136,8 +152,6 @@ const Editor: React.FC<EditorProps> = ({ song, updateSong }) => {
       y = 0;
       setHoveredX(-1);
       setHoveredY(-1);
-      // priorX = -1;
-      // priorY = -1;
     };
 
     canvas.addEventListener('mousedown', startPaint);
@@ -151,7 +165,7 @@ const Editor: React.FC<EditorProps> = ({ song, updateSong }) => {
       canvas.removeEventListener('mouseleave', stopPaint);
       canvas.removeEventListener('mouseup', stopPaint);
     };
-  }, []);
+  }, [activeSongId]);
 
 
   React.useEffect(() => {
@@ -177,6 +191,32 @@ const Editor: React.FC<EditorProps> = ({ song, updateSong }) => {
       canvas.style.width = `${width}px`;
 
       ctx.scale(pixelRatio, pixelRatio);
+    }
+
+    // piano keys
+    {
+      const keys = {
+        black: {
+          color: '#000',
+          offset: 5,
+          height: 4,
+          width: 6
+        },
+        white: {
+          color: '#fff',
+          offset: 5,
+          height: 5,
+          width: 12
+        }
+      };
+      for (let i = 0; i < fullScale.length; i++) {
+        const pitch = fullScale[i];
+        const key = (pitch.includes('#') || pitch.includes('b')) ? keys.black : keys.white;
+        ctx.fillStyle = key.color;
+        const x = 0;
+        const y = (ROW_HEIGHT + PADDING) * (i + 1) - key.offset;
+        ctx.fillRect(x, y, key.width, key.height);
+      }
     }
 
     // write each note name in the first column:

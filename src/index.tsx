@@ -16,21 +16,22 @@ type Note = song.Note;
 type Instrument = instrument.T;
 
 
-const songs = [song.defaults['Mario'], song.defaults['Lux Aeterna'], song.defaults['Twinkle'], song.defaults['New Song']];
-
 function App() {
 
-  const [activeSong, setActiveSong] = React.useState<Song>(songs[0]);
+  const [songs, setSongs] = React.useState<{[key: string]: Song }>({
+    'New Song': song.defaults['New Song'],
+    'Carol': song.defaults['Carol']
+  });
+
+  const [activeSongId, setActiveSongId] = React.useState<string>('New Song');
+
 
   const updateSong = (song: Song) => {
-    const priorSongIndex = songs.findIndex((x) => x.id === song.id);
-    const priorSong = songs[priorSongIndex];
-    if (!priorSong) return;
-    songs.splice(priorSongIndex, 1, song);
-    setActiveSong(song);
+    setSongs(Object.assign({}, songs, { [song.id]: song }));
   };
 
   const togglePlay = async () => {
+    const activeSong = songs[activeSongId];
     const activeInstrument = instrument.defaults[activeSong.instrumentId];
     const beatLength = (60 / 4) / activeSong.bpm; // / 4 since it's quarter notes?
     for (const note of activeSong.notes) {
@@ -45,7 +46,7 @@ function App() {
   return <>
     <div className="App">
       <Header
-        song={activeSong}
+        song={songs[activeSongId]}
         updateSong={updateSong}
         instruments={[
           instrument.defaults['Flute'],
@@ -55,11 +56,11 @@ function App() {
       />
       <Sidebar
         songs={songs}
-        activeSong={activeSong}
-        setActiveSong={setActiveSong}
+        activeSong={songs[activeSongId]}
+        setActiveSongId={setActiveSongId}
       />
-      <Editor song={activeSong} updateSong={updateSong} />
-      <Controls song={activeSong} updateSong={updateSong} togglePlay={togglePlay} />
+      <Editor activeSongId={activeSongId} song={songs[activeSongId]} updateSong={updateSong} />
+      <Controls song={songs[activeSongId]} updateSong={updateSong} togglePlay={togglePlay} />
     </div>
   </>;
 }

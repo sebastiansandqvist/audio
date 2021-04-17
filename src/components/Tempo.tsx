@@ -4,7 +4,6 @@ import Icon from './Icon';
 
 function useSpinner(value: number, action: Function) {
   const [isSpinning, setIsSpinning] = React.useState(false);
-  // const [runOnce, setRunOnce] = React.useState(true);
   const rafId = React.useRef<number | undefined>();
   const timeoutId = React.useRef<number | undefined>();
 
