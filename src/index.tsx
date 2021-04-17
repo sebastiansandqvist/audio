@@ -22,7 +22,7 @@ function App() {
     setSongs(Object.assign({}, songs, { [song.id]: song }));
   };
 
-  const togglePlay = async () => {
+  const togglePlay = () => {
     if (isPlaying) return; // TODO: add pause functionality here instead of blocking double play
     setIsPlaying(true);
     const activeSong = songs[activeSongId];
