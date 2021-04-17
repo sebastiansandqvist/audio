@@ -1,10 +1,7 @@
 declare const React: typeof import('react');
 declare const Wad: typeof import('web-audio-daw');
-import * as song from '../song';
-import * as instrument from '../instrument';
-
-type Song = song.T;
-type Instrument = instrument.T;
+import { Song } from '../song';
+import { Instrument, instruments } from '../instrument';
 
 
 const scale = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B'];
@@ -32,6 +29,7 @@ function playPreviewNote(pitch: string, instrument: Instrument) {
 
 
 interface EditorProps {
+  activeBeat: number;
   activeSongId: string;
   song: Song;
   updateSong: (song: Song) => void;
@@ -59,7 +57,7 @@ interface Coordinate {
   y: number;
 }
 
-const Editor: React.FC<EditorProps> = ({ activeSongId, song, updateSong }) => {
+const Editor: React.FC<EditorProps> = ({ activeBeat, activeSongId, song, updateSong }) => {
   const X_OFFSET = 60;
   const Y_OFFSET = 7;
   const ROW_HEIGHT = 15;
@@ -104,8 +102,8 @@ const Editor: React.FC<EditorProps> = ({ activeSongId, song, updateSong }) => {
             pitch,
             duration: 1
           });
-          if (song.instrumentId in instrument.defaults) {
-            playPreviewNote(pitch, instrument.defaults[song.instrumentId]);
+          if (song.instrumentId in instruments) {
+            playPreviewNote(pitch, instruments[song.instrumentId]);
           }
           updateSong({ ...song });
         }
@@ -134,8 +132,8 @@ const Editor: React.FC<EditorProps> = ({ activeSongId, song, updateSong }) => {
             pitch,
             duration: 1
           });
-          if (song.instrumentId in instrument.defaults) {
-            playPreviewNote(pitch, instrument.defaults[song.instrumentId]);
+          if (song.instrumentId in instruments) {
+            playPreviewNote(pitch, instruments[song.instrumentId]);
           }
         }
         else {
@@ -239,7 +237,7 @@ const Editor: React.FC<EditorProps> = ({ activeSongId, song, updateSong }) => {
         for (let x = 0; x < columns; x++) {
           const v = Y_OFFSET + ((ROW_HEIGHT + PADDING) * y);
           const h = X_OFFSET + ((ROW_WIDTH + PADDING) * x);
-          ctx.fillStyle = (x === hoveredX && y === hoveredY) ? '#8699b5' : (x === hoveredX || y === hoveredY) ? '#b5c2d2' : '#c5cfdc';
+          ctx.fillStyle = (x === hoveredX && y === hoveredY) ? '#8699b5' : (x === activeBeat || x === hoveredX || y === hoveredY) ? '#b5c2d2' : '#c5cfdc';
           ctx.fillRect(h, v, ROW_WIDTH, ROW_HEIGHT);
         }
       }
@@ -259,7 +257,7 @@ const Editor: React.FC<EditorProps> = ({ activeSongId, song, updateSong }) => {
       }
     }
 
-  }, [song, hoveredX, hoveredY]);
+  }, [song, hoveredX, hoveredY, activeBeat]);
 
   return <>
     <div className="Editor">

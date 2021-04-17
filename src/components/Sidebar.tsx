@@ -1,7 +1,6 @@
 declare const React: typeof import('react');
-import * as song from '../song';
+import { Song } from '../song';
 
-type Song = song.T;
 
 interface SidebarProps {
   songs: { [key: string]: Song };

@@ -1,8 +1,6 @@
 declare const React: typeof import('react');
 import Icon from './Icon';
-import * as song from '../song';
-
-type Song = song.T;
+import { Song } from '../song';
 
 interface ControlsProps {
   song: Song;

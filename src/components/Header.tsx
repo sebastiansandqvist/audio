@@ -1,10 +1,7 @@
 declare const React: typeof import('react');
-import * as song from '../song';
-import * as instrument from '../instrument';
+import { Song } from '../song';
+import { Instrument } from '../instrument';
 import Tempo from './Tempo';
-
-type Song = song.T;
-type Instrument = instrument.T;
 
 interface HeaderProps {
   song: Song;

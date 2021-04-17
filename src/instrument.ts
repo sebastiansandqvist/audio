@@ -1,11 +1,11 @@
 declare const Wad: typeof import('web-audio-daw');
 
-export interface T {
-  id: keyof typeof defaults;
+export interface Instrument {
+  id: keyof typeof instruments;
   wad: InstanceType<typeof Wad>;
 }
 
-export const defaults: { [key: string]: T } = {
+export const instruments: { [key: string]: Instrument } = {
   'Flute': {
     id: 'Flute',
     wad: new Wad({
