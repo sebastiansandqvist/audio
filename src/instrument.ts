@@ -11,11 +11,12 @@ export const instruments: { [key: string]: Instrument } = {
     wad: new Wad({
       source: 'triangle',
       pitch: 'C5',
+      volume: 0.5,
       env: {
         attack: 0.1,
-        decay: 0.1,
+        decay: 0.02,
         hold: 0.4,
-        sustain: 0.4,
+        sustain: 0.3,
         release: 0.2
       },
       filter: {
@@ -30,7 +31,7 @@ export const instruments: { [key: string]: Instrument } = {
       vibrato: {
         attack: 0.1,
         speed: 5,
-        magnitude: 4
+        magnitude: 6
       }
     })
   },
@@ -39,6 +40,7 @@ export const instruments: { [key: string]: Instrument } = {
     wad: new Wad({
       source: 'square',
       pitch: 'C4',
+      volume: 0.5,
       env: {
         attack: 0.01,
         decay: 0.005,
@@ -62,6 +64,7 @@ export const instruments: { [key: string]: Instrument } = {
     wad: new Wad({
       source: 'square',
       pitch: 'C4',
+      volume: 0.5,
       env: {
         attack: 0.005,
         decay: 0.005,
