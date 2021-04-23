@@ -11,26 +11,25 @@ import {
   Sidebar
 } from './components';
 
-// let songs = { ...songData };
+const songs = { ...songData };
 
 function App() {
 
-  const songs = React.useRef<{[key: string]: Song }>({ ...songData });
+  // const songs = React.useRef<{[key: string]: Song }>({ ...songData });
   const [activeSongId, setActiveSongId] = React.useState('New Song');
+  const [activeSong, setActiveSong] = React.useState(songs[activeSongId]);
   const [activeBeat, setActiveBeat] = React.useState(-1);
   const [isPlaying, setIsPlaying] = React.useState(false);
 
   const updateSong = (songId: string, updates: Partial<Song>) => {
-    console.log('before', songId, songs.current[songId], songs);
-    const updatedSong = Object.assign({}, songs.current[songId], updates);
-    songs.current = (Object.assign({}, songs.current, { [songId]: updatedSong }));
-    console.log('update!', songId, updates, updatedSong, songs);
+    const updatedSong = Object.assign({}, songs[songId], updates);
+    songs[songId] = updatedSong;
+    setActiveSong(updatedSong);
   };
 
   const togglePlay = () => {
     if (isPlaying) return; // TODO: add pause (or stop) functionality here instead of blocking double play
     setIsPlaying(true);
-    const activeSong = songs.current[activeSongId];
     const activeInstrument = instruments[activeSong.instrumentId];
     const beatLength = (60 / 4) / activeSong.bpm; // / 4 since it's quarter notes?
 
@@ -66,7 +65,7 @@ function App() {
   return <>
     <div className="App">
       <Header
-        song={songs.current[activeSongId]}
+        song={activeSong}
         updateSong={updateSong}
         instruments={[
           instruments['Flute'],
@@ -77,12 +76,13 @@ function App() {
       <Sidebar
         activeSongId={activeSongId}
         setActiveSongId={setActiveSongId}
-        songs={songs.current}
+        setActiveSong={setActiveSong}
+        songs={songs}
       />
       <Editor
         activeBeat={activeBeat}
         activeSongId={activeSongId}
-        song={songs.current[activeSongId]}
+        song={activeSong}
         updateSong={updateSong}
       />
       <Controls

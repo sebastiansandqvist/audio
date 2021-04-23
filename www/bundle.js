@@ -275,7 +275,7 @@
                         if (song.instrumentId in instruments) {
                             playPreviewNote(pitch_1, instruments[song.instrumentId]);
                         }
-                        console.log('updating song', song);
+                        // console.log('updating song', song);
                         updateSong(activeSongId, { notes: song.notes });
                     }
                 }
@@ -307,7 +307,7 @@
                         // clicking an already existing note will toggle it off
                         song.notes.splice(existingNoteIndex, 1);
                     }
-                    console.log('updating song', song);
+                    // console.log('updating song', song);
                     updateSong(activeSongId, { notes: song.notes });
                 }
             };
@@ -384,7 +384,7 @@
                     ctx.fillText(formatPitch(pitch), x, y);
                 }
             }
-            // draw a grid of empty squares:
+            // draw a grid of empty squares, with some highlighted for :hover:
             {
                 for (var y = 0; y < fullScale.length; y++) {
                     for (var x = 0; x < columns; x++) {
@@ -501,34 +501,33 @@
     };
 
     var Sidebar = function (_a) {
-        var songs = _a.songs, activeSongId = _a.activeSongId, setActiveSongId = _a.setActiveSongId;
+        var songs = _a.songs, activeSongId = _a.activeSongId, setActiveSongId = _a.setActiveSongId, setActiveSong = _a.setActiveSong;
         return React.createElement(React.Fragment, null,
             React.createElement("aside", { className: "Sidebar" },
                 React.createElement("div", { className: "Sidebar-heading" }, "Songs"),
                 React.createElement("div", { className: "pad20" }, Object.keys(songs).map(function (songId) { return (React.createElement("a", { className: activeSongId === songId ? 'active' : '', href: "#", key: songId, onClick: function (event) {
                         event.preventDefault();
                         setActiveSongId(songId);
+                        setActiveSong(songs[songId]);
                     } }, songs[songId].title || 'Untitled')); }))));
     };
 
-    // let songs = { ...songData };
+    var songs = __assign({}, songData);
     function App() {
-        var songs = React.useRef(__assign({}, songData));
+        // const songs = React.useRef<{[key: string]: Song }>({ ...songData });
         var _a = React.useState('New Song'), activeSongId = _a[0], setActiveSongId = _a[1];
-        var _b = React.useState(-1), activeBeat = _b[0], setActiveBeat = _b[1];
-        var _c = React.useState(false), isPlaying = _c[0], setIsPlaying = _c[1];
+        var _b = React.useState(songs[activeSongId]), activeSong = _b[0], setActiveSong = _b[1];
+        var _c = React.useState(-1), activeBeat = _c[0], setActiveBeat = _c[1];
+        var _d = React.useState(false), isPlaying = _d[0], setIsPlaying = _d[1];
         var updateSong = function (songId, updates) {
-            var _a;
-            console.log('before', songId, songs.current[songId], songs);
-            var updatedSong = Object.assign({}, songs.current[songId], updates);
-            songs.current = (Object.assign({}, songs.current, (_a = {}, _a[songId] = updatedSong, _a)));
-            console.log('update!', songId, updates, updatedSong, songs);
+            var updatedSong = Object.assign({}, songs[songId], updates);
+            songs[songId] = updatedSong;
+            setActiveSong(updatedSong);
         };
         var togglePlay = function () {
             if (isPlaying)
                 return; // TODO: add pause (or stop) functionality here instead of blocking double play
             setIsPlaying(true);
-            var activeSong = songs.current[activeSongId];
             var activeInstrument = instruments[activeSong.instrumentId];
             var beatLength = (60 / 4) / activeSong.bpm; // / 4 since it's quarter notes?
             // 1. queue up all the audio to be played at the correct `wait` offset:
@@ -561,13 +560,13 @@
         };
         return React.createElement(React.Fragment, null,
             React.createElement("div", { className: "App" },
-                React.createElement(Header, { song: songs.current[activeSongId], updateSong: updateSong, instruments: [
+                React.createElement(Header, { song: activeSong, updateSong: updateSong, instruments: [
                         instruments['Flute'],
                         instruments['Piano'],
                         instruments['Synth Lead']
                     ] }),
-                React.createElement(Sidebar, { activeSongId: activeSongId, setActiveSongId: setActiveSongId, songs: songs.current }),
-                React.createElement(Editor, { activeBeat: activeBeat, activeSongId: activeSongId, song: songs.current[activeSongId], updateSong: updateSong }),
+                React.createElement(Sidebar, { activeSongId: activeSongId, setActiveSongId: setActiveSongId, setActiveSong: setActiveSong, songs: songs }),
+                React.createElement(Editor, { activeBeat: activeBeat, activeSongId: activeSongId, song: activeSong, updateSong: updateSong }),
                 React.createElement(Controls, { activeSongId: activeSongId, updateSong: updateSong, togglePlay: togglePlay })));
     }
     ReactDOM.render(React.createElement(App, null), document.getElementById('app'));

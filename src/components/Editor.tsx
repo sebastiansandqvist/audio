@@ -105,7 +105,7 @@ const Editor: React.FC<EditorProps> = ({ activeBeat, activeSongId, song, updateS
           if (song.instrumentId in instruments) {
             playPreviewNote(pitch, instruments[song.instrumentId]);
           }
-          console.log('updating song', song);
+          // console.log('updating song', song);
           updateSong(activeSongId, { notes: song.notes });
         }
       }
@@ -141,7 +141,7 @@ const Editor: React.FC<EditorProps> = ({ activeBeat, activeSongId, song, updateS
           // clicking an already existing note will toggle it off
           song.notes.splice(existingNoteIndex, 1);
         }
-        console.log('updating song', song);
+        // console.log('updating song', song);
         updateSong(activeSongId, { notes: song.notes });
       }
     };
@@ -232,7 +232,7 @@ const Editor: React.FC<EditorProps> = ({ activeBeat, activeSongId, song, updateS
       }
     }
 
-    // draw a grid of empty squares:
+    // draw a grid of empty squares, with some highlighted for :hover:
     {
 
       for (let y = 0; y < fullScale.length; y++) {
