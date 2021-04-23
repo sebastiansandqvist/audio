@@ -5,6 +5,7 @@
   "scripts": {
     "build": "NODE_ENV=production rollup -c",
     "dev": "rollup -c --watch",
+    "deploy": "npm run build && firebase deploy --only hosting",
     "serve": "browser-sync start --server --serveStatic \"www\" --files \"www/**\" --no-open --port 3000",
     "start": "npm-run-all --parallel dev serve"
   },
@@ -15,7 +16,6 @@
     "@rollup/plugin-replace": "2.4.2",
     "@types/react": "17.0.3",
     "@types/react-dom": "17.0.3",
-    "@types/react-redux": "7.1.16",
     "browser-sync": "2.26.14",
     "npm-run-all": "4.1.5",
     "rollup": "2.44.0",
@@ -27,7 +27,6 @@
   "dependencies": {
     "react": "17.0.2",
     "react-dom": "17.0.2",
-    "react-redux": "7.2.3",
     "tslib": "2.2.0",
     "web-audio-daw": "4.11.0"
   }

@@ -32,7 +32,7 @@ interface EditorProps {
   activeBeat: number;
   activeSongId: string;
   song: Song;
-  updateSong: (song: Song) => void;
+  updateSong: (songId: string, updates: Partial<Song>) => void;
 }
 
 function formatPitch(pitch: string) {
@@ -105,7 +105,8 @@ const Editor: React.FC<EditorProps> = ({ activeBeat, activeSongId, song, updateS
           if (song.instrumentId in instruments) {
             playPreviewNote(pitch, instruments[song.instrumentId]);
           }
-          updateSong({ ...song });
+          console.log('updating song', song);
+          updateSong(activeSongId, { notes: song.notes });
         }
       }
 
@@ -140,7 +141,8 @@ const Editor: React.FC<EditorProps> = ({ activeBeat, activeSongId, song, updateS
           // clicking an already existing note will toggle it off
           song.notes.splice(existingNoteIndex, 1);
         }
-        updateSong({ ...song });
+        console.log('updating song', song);
+        updateSong(activeSongId, { notes: song.notes });
       }
     };
 

@@ -11,24 +11,30 @@ import {
   Sidebar
 } from './components';
 
+// let songs = { ...songData };
+
 function App() {
 
-  const [songs, setSongs] = React.useState({ ...songData });
+  const songs = React.useRef<{[key: string]: Song }>({ ...songData });
   const [activeSongId, setActiveSongId] = React.useState('New Song');
   const [activeBeat, setActiveBeat] = React.useState(-1);
   const [isPlaying, setIsPlaying] = React.useState(false);
 
-  const updateSong = (song: Song) => {
-    setSongs(Object.assign({}, songs, { [song.id]: song }));
+  const updateSong = (songId: string, updates: Partial<Song>) => {
+    console.log('before', songId, songs.current[songId], songs);
+    const updatedSong = Object.assign({}, songs.current[songId], updates);
+    songs.current = (Object.assign({}, songs.current, { [songId]: updatedSong }));
+    console.log('update!', songId, updates, updatedSong, songs);
   };
 
   const togglePlay = () => {
-    if (isPlaying) return; // TODO: add pause functionality here instead of blocking double play
+    if (isPlaying) return; // TODO: add pause (or stop) functionality here instead of blocking double play
     setIsPlaying(true);
-    const activeSong = songs[activeSongId];
+    const activeSong = songs.current[activeSongId];
     const activeInstrument = instruments[activeSong.instrumentId];
     const beatLength = (60 / 4) / activeSong.bpm; // / 4 since it's quarter notes?
 
+    // 1. queue up all the audio to be played at the correct `wait` offset:
     for (const note of activeSong.notes) {
       activeInstrument.wad.play({
         pitch: note.pitch,
@@ -37,11 +43,13 @@ function App() {
       });
     }
 
+    // 2. calculate the end timestamp x coordinate:
     let maxBeatX = 0;
     for (const note of activeSong.notes) {
       maxBeatX = Math.max(maxBeatX, note.x + note.duration);
     }
 
+    // 3. update the `activeBeat` on each tick:
     let beat = 0;
     setActiveBeat(beat);
     const interval = setInterval(() => {
@@ -53,13 +61,12 @@ function App() {
         setActiveBeat(-1);
       }
     }, beatLength * 1000);
-
   };
 
   return <>
     <div className="App">
       <Header
-        song={songs[activeSongId]}
+        song={songs.current[activeSongId]}
         updateSong={updateSong}
         instruments={[
           instruments['Flute'],
@@ -68,17 +75,21 @@ function App() {
         ]}
       />
       <Sidebar
-        songs={songs}
-        activeSong={songs[activeSongId]}
+        activeSongId={activeSongId}
         setActiveSongId={setActiveSongId}
+        songs={songs.current}
       />
       <Editor
         activeBeat={activeBeat}
         activeSongId={activeSongId}
-        song={songs[activeSongId]}
+        song={songs.current[activeSongId]}
         updateSong={updateSong}
       />
-      <Controls song={songs[activeSongId]} updateSong={updateSong} togglePlay={togglePlay} />
+      <Controls
+        activeSongId={activeSongId}
+        updateSong={updateSong}
+        togglePlay={togglePlay}
+      />
     </div>
   </>;
 }

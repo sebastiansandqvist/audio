@@ -27,7 +27,7 @@ function fixOffset(notes: Note[]): Note[] {
 export const songData: { [key: string]: Song } = {
   'New Song': {
     id: 'New Song',
-    title: '',
+    title: '[New Song]',
     bpm: 120,
     instrumentId: 'Piano',
     notes: []

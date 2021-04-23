@@ -3,13 +3,13 @@ import Icon from './Icon';
 import { Song } from '../song';
 
 interface ControlsProps {
-  song: Song;
-  updateSong: (song: Song) => void;
+  activeSongId: string;
+  updateSong: (songId: string, updates: Partial<Song>) => void;
   togglePlay: () => void;
 }
 
 
-const Controls: React.FC<ControlsProps> = ({ song, updateSong, togglePlay }) => {
+const Controls: React.FC<ControlsProps> = ({ activeSongId, updateSong, togglePlay }) => {
   return <>
     <div className="Controls">
       <button className="Control-play" onClick={togglePlay}>
@@ -20,8 +20,7 @@ const Controls: React.FC<ControlsProps> = ({ song, updateSong, togglePlay }) => 
           <button
             className="button mR20"
             onClick={() => {
-              song.notes.length = 0;
-              updateSong({ ...song });
+              updateSong(activeSongId, { notes: [] });
             }}>
               Clear
           </button>

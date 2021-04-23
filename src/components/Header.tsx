@@ -5,7 +5,7 @@ import Tempo from './Tempo';
 
 interface HeaderProps {
   song: Song;
-  updateSong:  (song: Song) => void;
+  updateSong:  (songId: string, updates: Partial<Song>) => void;
   instruments: Instrument[];
 }
 
@@ -17,10 +17,8 @@ const Header: React.FC<HeaderProps> = ({ song, updateSong, instruments }) => {
         placeholder="Name your song..."
         value={song.title}
         onInput={(event) => {
-          updateSong({
-            ...song,
-            title: (event.target as HTMLInputElement).value
-          });
+          const title = (event.target as HTMLInputElement).value;
+          updateSong(song.id, { title });
         }}
       />
       <div>
@@ -29,10 +27,7 @@ const Header: React.FC<HeaderProps> = ({ song, updateSong, instruments }) => {
             instrument.wad.stop();
             if (instrument.id === event.target.value) {
               instrument.wad.play();
-              updateSong({
-                ...song,
-                instrumentId: event.target.value
-              });
+              updateSong(song.id, { instrumentId: instrument.id });
             }
           }
         }}>
@@ -45,7 +40,7 @@ const Header: React.FC<HeaderProps> = ({ song, updateSong, instruments }) => {
         <Tempo
           bpm={song.bpm}
           updateBpm={(bpm) => {
-            updateSong({ ...song, bpm });
+            updateSong(song.id, { bpm });
           }}
         />
       </div>
