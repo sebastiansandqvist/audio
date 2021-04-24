@@ -57,10 +57,10 @@ const Editor: React.FC<EditorProps> = ({ activeBeat, activeSongId, song, addNote
   const Y_OFFSET = 7;
   const ROW_HEIGHT = 15;
   const ROW_WIDTH = 15;
-  const Y_FIX = ROW_HEIGHT; // magic offset # to handle rounding errors when determining which cell is hovered
   const PADDING = 2;
 
-  const [hoveredCoords, setHoveredCoords] = React.useState<[number, number]>([-1, -1]);
+  const [hoveredX, setHoveredX] = React.useState(-1);
+  const [hoveredY, setHoveredY] = React.useState(-1);
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
 
   React.useEffect(() => {
@@ -68,60 +68,58 @@ const Editor: React.FC<EditorProps> = ({ activeBeat, activeSongId, song, addNote
     if (canvas === null) return;
 
     let isPainting = false;
-
-    let [hoveredX, hoveredY] = hoveredCoords;
+    let [internalHoveredX, internalHoveredY] = [-1, -1];
 
     const paint = (event: MouseEvent) => {
-      const x = event.offsetX - canvas.offsetLeft;
-      const y = event.offsetY - canvas.offsetTop;
+      const screenX = event.offsetX - canvas.offsetLeft;
+      const screenY = event.offsetY - canvas.offsetTop;
 
-      const xCoord = Math.round(x / (ROW_WIDTH + PADDING)) - Math.round(X_OFFSET / ROW_WIDTH);
-      const yCoord = Math.round(y / (ROW_HEIGHT + PADDING)) - Math.round(Y_FIX / ROW_HEIGHT);
+      const x = Math.round(screenX / (ROW_WIDTH + PADDING)) - Math.round(X_OFFSET / ROW_WIDTH);
+      const y = Math.round(screenY / (ROW_HEIGHT + PADDING)) - 1;
 
-      if (xCoord < 0 || yCoord < 0) return;
+      if (x < 0 || y < 0) return;
 
-      setHoveredCoords([xCoord, yCoord]);
+      setHoveredX(x);
+      setHoveredY(y);
 
       if (!isPainting) return;
 
-      const pitch = fullScale[yCoord];
-      const existingNote = song.notes.find((note) => note.pitch === pitch && note.x === xCoord);
-      if (!existingNote) {
-        // add-only mode when dragging, no removal:
-        addNote({ x: xCoord, pitch, duration: 1 });
+      const pitch = fullScale[y];
+      // we're in add-only mode when dragging (no note removal/toggle):
+      addNote({ x, pitch, duration: 1 });
 
-        // only play the preview note if we've hovered to a new cell
-        // (avoids repeating the same note when dragging within a cell)
-        if (hoveredX !== xCoord || hoveredY !== yCoord) {
-          playPreviewNote(pitch);
-        }
+      // only play the preview note if we've hovered to a new cell:
+      // (avoids repeating the same note when dragging within a cell)
+      if (internalHoveredX !== x || internalHoveredY !== y) {
+        playPreviewNote(pitch);
       }
 
-      [hoveredX, hoveredY] = [xCoord, yCoord];
+      [internalHoveredX, internalHoveredY] = [x, y];
     };
 
     const startPaint = (event: MouseEvent) => {
       isPainting = true;
-      const x = event.offsetX - canvas.offsetLeft;
-      const y = event.offsetY - canvas.offsetTop;
+      const screenX = event.offsetX - canvas.offsetLeft;
+      const screenY = event.offsetY - canvas.offsetTop;
 
-      const xCoord = Math.round(x / (ROW_WIDTH + PADDING)) - Math.round(X_OFFSET / ROW_WIDTH);
-      const yCoord = Math.round(y / (ROW_HEIGHT + PADDING)) - Math.round(Y_FIX / ROW_HEIGHT);
+      const x = Math.round(screenX / (ROW_WIDTH + PADDING)) - Math.round(X_OFFSET / ROW_WIDTH);
+      const y = Math.round(screenY / (ROW_HEIGHT + PADDING)) - 1;
 
-      if (xCoord < 0 || yCoord < 0) return;
+      if (x < 0 || y < 0) return;
 
-      const pitch = fullScale[yCoord];
+      const pitch = fullScale[y];
       // toggle mode when dragging (can add OR remove notes, determined by prior state):
-      toggleNote({ x: xCoord, pitch, duration: 1 });
+      toggleNote({ x, pitch, duration: 1 });
       playPreviewNote(pitch);
 
-      [hoveredX, hoveredY] = [xCoord, yCoord];
+      [internalHoveredX, internalHoveredY] = [x, y];
     };
 
     const stopPaint = (event: MouseEvent) => {
       isPainting = false;
-      setHoveredCoords([-1, -1]);
-      [hoveredX, hoveredY] = [-1, -1];
+      setHoveredX(-1);
+      setHoveredY(-1);
+      [internalHoveredX, internalHoveredY] = [-1, -1];
     };
 
     canvas.addEventListener('mousedown', startPaint);
@@ -135,7 +133,7 @@ const Editor: React.FC<EditorProps> = ({ activeBeat, activeSongId, song, addNote
       canvas.removeEventListener('mouseleave', stopPaint);
       canvas.removeEventListener('mouseup', stopPaint);
     };
-  }, []);
+  }, [activeSongId]);
 
 
   React.useEffect(() => {
@@ -204,12 +202,14 @@ const Editor: React.FC<EditorProps> = ({ activeBeat, activeSongId, song, addNote
 
     // draw a grid of empty squares, with some highlighted for :hover:
     {
-      const [hoveredX, hoveredY] = hoveredCoords;
       for (let y = 0; y < fullScale.length; y++) {
         for (let x = 0; x < columns; x++) {
           const v = Y_OFFSET + ((ROW_HEIGHT + PADDING) * y);
           const h = X_OFFSET + ((ROW_WIDTH + PADDING) * x);
-          ctx.fillStyle = (x === hoveredX && y === hoveredY) ? '#8699b5' : (x === activeBeat || x === hoveredX || y === hoveredY) ? '#b5c2d2' : '#c5cfdc';
+          ctx.fillStyle =
+            (x === hoveredX && y === hoveredY) ? '#8699b5' :
+            (x === activeBeat || x === hoveredX || y === hoveredY) ? '#b5c2d2' :
+            '#c5cfdc';
           ctx.fillRect(h, v, ROW_WIDTH, ROW_HEIGHT);
         }
       }
@@ -229,7 +229,7 @@ const Editor: React.FC<EditorProps> = ({ activeBeat, activeSongId, song, addNote
       }
     }
 
-  }, [song, hoveredCoords, activeBeat]);
+  }, [activeSongId, song, hoveredX, hoveredY, activeBeat]);
 
   return <>
     <div className="Editor">

@@ -1992,65 +1992,64 @@
         return Math.max(maxNotePosition + EXTRA_VISIBLE_COLUMNS, MIN_LENGTH);
     }
     var Editor = function (_a) {
-        var activeBeat = _a.activeBeat; _a.activeSongId; var song = _a.song, addNote = _a.addNote, toggleNote = _a.toggleNote, playPreviewNote = _a.playPreviewNote;
+        var activeBeat = _a.activeBeat, activeSongId = _a.activeSongId, song = _a.song, addNote = _a.addNote, toggleNote = _a.toggleNote, playPreviewNote = _a.playPreviewNote;
         var X_OFFSET = 60;
         var Y_OFFSET = 7;
         var ROW_HEIGHT = 15;
         var ROW_WIDTH = 15;
-        var Y_FIX = ROW_HEIGHT; // magic offset # to handle rounding errors when determining which cell is hovered
         var PADDING = 2;
-        var _b = React.useState([-1, -1]), hoveredCoords = _b[0], setHoveredCoords = _b[1];
+        var _b = React.useState(-1), hoveredX = _b[0], setHoveredX = _b[1];
+        var _c = React.useState(-1), hoveredY = _c[0], setHoveredY = _c[1];
         var canvasRef = React.useRef(null);
         React.useEffect(function () {
             var canvas = canvasRef.current;
             if (canvas === null)
                 return;
             var isPainting = false;
-            var hoveredX = hoveredCoords[0], hoveredY = hoveredCoords[1];
+            var _a = [-1, -1], internalHoveredX = _a[0], internalHoveredY = _a[1];
             var paint = function (event) {
                 var _a;
-                var x = event.offsetX - canvas.offsetLeft;
-                var y = event.offsetY - canvas.offsetTop;
-                var xCoord = Math.round(x / (ROW_WIDTH + PADDING)) - Math.round(X_OFFSET / ROW_WIDTH);
-                var yCoord = Math.round(y / (ROW_HEIGHT + PADDING)) - Math.round(Y_FIX / ROW_HEIGHT);
-                if (xCoord < 0 || yCoord < 0)
+                var screenX = event.offsetX - canvas.offsetLeft;
+                var screenY = event.offsetY - canvas.offsetTop;
+                var x = Math.round(screenX / (ROW_WIDTH + PADDING)) - Math.round(X_OFFSET / ROW_WIDTH);
+                var y = Math.round(screenY / (ROW_HEIGHT + PADDING)) - 1;
+                if (x < 0 || y < 0)
                     return;
-                setHoveredCoords([xCoord, yCoord]);
+                setHoveredX(x);
+                setHoveredY(y);
                 if (!isPainting)
                     return;
-                var pitch = fullScale[yCoord];
-                var existingNote = song.notes.find(function (note) { return note.pitch === pitch && note.x === xCoord; });
-                if (!existingNote) {
-                    // add-only mode when dragging, no removal:
-                    addNote({ x: xCoord, pitch: pitch, duration: 1 });
-                    // only play the preview note if we've hovered to a new cell
-                    // (avoids repeating the same note when dragging within a cell)
-                    if (hoveredX !== xCoord || hoveredY !== yCoord) {
-                        playPreviewNote(pitch);
-                    }
+                var pitch = fullScale[y];
+                // we're in add-only mode when dragging (no note removal/toggle):
+                addNote({ x: x, pitch: pitch, duration: 1 });
+                // only play the preview note if we've hovered to a new cell:
+                // (avoids repeating the same note when dragging within a cell)
+                if (internalHoveredX !== x || internalHoveredY !== y) {
+                    playPreviewNote(pitch);
                 }
-                _a = [xCoord, yCoord], hoveredX = _a[0], hoveredY = _a[1];
+                _a = [x, y], internalHoveredX = _a[0], internalHoveredY = _a[1];
             };
             var startPaint = function (event) {
                 var _a;
                 isPainting = true;
-                var x = event.offsetX - canvas.offsetLeft;
-                var y = event.offsetY - canvas.offsetTop;
-                var xCoord = Math.round(x / (ROW_WIDTH + PADDING)) - Math.round(X_OFFSET / ROW_WIDTH);
-                var yCoord = Math.round(y / (ROW_HEIGHT + PADDING)) - Math.round(Y_FIX / ROW_HEIGHT);
-                if (xCoord < 0 || yCoord < 0)
+                var screenX = event.offsetX - canvas.offsetLeft;
+                var screenY = event.offsetY - canvas.offsetTop;
+                var x = Math.round(screenX / (ROW_WIDTH + PADDING)) - Math.round(X_OFFSET / ROW_WIDTH);
+                var y = Math.round(screenY / (ROW_HEIGHT + PADDING)) - 1;
+                if (x < 0 || y < 0)
                     return;
-                var pitch = fullScale[yCoord];
+                var pitch = fullScale[y];
                 // toggle mode when dragging (can add OR remove notes, determined by prior state):
-                toggleNote({ x: xCoord, pitch: pitch, duration: 1 });
+                toggleNote({ x: x, pitch: pitch, duration: 1 });
                 playPreviewNote(pitch);
-                _a = [xCoord, yCoord], hoveredX = _a[0], hoveredY = _a[1];
+                _a = [x, y], internalHoveredX = _a[0], internalHoveredY = _a[1];
             };
             var stopPaint = function (event) {
                 var _a;
                 isPainting = false;
-                setHoveredCoords([-1, -1]);
-                _a = [-1, -1], hoveredX = _a[0], hoveredY = _a[1];
+                setHoveredX(-1);
+                setHoveredY(-1);
+                _a = [-1, -1], internalHoveredX = _a[0], internalHoveredY = _a[1];
             };
             canvas.addEventListener('mousedown', startPaint);
             canvas.addEventListener('mousemove', paint);
@@ -2062,7 +2061,7 @@
                 canvas.removeEventListener('mouseleave', stopPaint);
                 canvas.removeEventListener('mouseup', stopPaint);
             };
-        }, []);
+        }, [activeSongId]);
         React.useEffect(function () {
             var canvas = canvasRef.current;
             if (canvas === null)
@@ -2120,12 +2119,14 @@
             }
             // draw a grid of empty squares, with some highlighted for :hover:
             {
-                var hoveredX = hoveredCoords[0], hoveredY = hoveredCoords[1];
                 for (var y = 0; y < fullScale.length; y++) {
                     for (var x = 0; x < columns; x++) {
                         var v = Y_OFFSET + ((ROW_HEIGHT + PADDING) * y);
                         var h = X_OFFSET + ((ROW_WIDTH + PADDING) * x);
-                        ctx.fillStyle = (x === hoveredX && y === hoveredY) ? '#8699b5' : (x === activeBeat || x === hoveredX || y === hoveredY) ? '#b5c2d2' : '#c5cfdc';
+                        ctx.fillStyle =
+                            (x === hoveredX && y === hoveredY) ? '#8699b5' :
+                                (x === activeBeat || x === hoveredX || y === hoveredY) ? '#b5c2d2' :
+                                    '#c5cfdc';
                         ctx.fillRect(h, v, ROW_WIDTH, ROW_HEIGHT);
                     }
                 }
@@ -2143,7 +2144,7 @@
                     ctx.fillRect(h, v, width, ROW_HEIGHT);
                 }
             }
-        }, [song, hoveredCoords, activeBeat]);
+        }, [activeSongId, song, hoveredX, hoveredY, activeBeat]);
         return React.createElement(React.Fragment, null,
             React.createElement("div", { className: "Editor" },
                 React.createElement("canvas", { id: "canvas", ref: canvasRef })));
