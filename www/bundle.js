@@ -33,6 +33,10 @@
         return to;
     }
 
+    // since some of the transformed midi songs don't have their first note on beat 0,
+    // this updates the offsets of all of the notes (at load time) to ensure that the
+    // first note ends up on x === 0. (TODO: precompute these offsets and replace the
+    // notes in the hard-coded songs below)
     function fixOffset(notes) {
         var offset = notes[0].x || 0;
         for (var _i = 0, notes_1 = notes; _i < notes_1.length; _i++) {
@@ -489,7 +493,6 @@
                     } }, songs[songId].title || 'Untitled')); }))));
     };
 
-    // const songs = { ...songData };
     function App() {
         var _a = React.useState(__assign({}, songData)), songs = _a[0], setSongs = _a[1];
         var _b = React.useState('New Song'), activeSongId = _b[0], setActiveSongId = _b[1];
@@ -507,7 +510,7 @@
             setSongs(function (songs) {
                 var _a;
                 var updatedSong = Object.assign({}, songs[activeSongId]);
-                var existingNote = updatedSong.notes.find(function (note) { return note.x === x && note.pitch === pitch; });
+                var existingNote = songs[activeSongId].notes.find(function (note) { return note.x === x && note.pitch === pitch; });
                 if (!existingNote) {
                     var updatedNotes = __spreadArray(__spreadArray([], updatedSong.notes), [
                         { x: x, pitch: pitch, duration: duration }
@@ -523,7 +526,7 @@
             setSongs(function (songs) {
                 var _a, _b;
                 var updatedSong = Object.assign({}, songs[activeSongId]);
-                var existingNote = updatedSong.notes.find(function (note) { return note.x === x && note.pitch === pitch; });
+                var existingNote = songs[activeSongId].notes.find(function (note) { return note.x === x && note.pitch === pitch; });
                 // if there was already a note at the provided coordinates, remove it:
                 if (existingNote) {
                     var updatedNotes = updatedSong.notes.filter(function (note) { return note !== existingNote; });

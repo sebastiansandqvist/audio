@@ -12,6 +12,10 @@ export interface Song {
   notes: Note[];
 }
 
+// since some of the transformed midi songs don't have their first note on beat 0,
+// this updates the offsets of all of the notes (at load time) to ensure that the
+// first note ends up on x === 0. (TODO: precompute these offsets and replace the
+// notes in the hard-coded songs below)
 function fixOffset(notes: Note[]): Note[] {
   let offset = notes[0].x || 0;
   for (const note of notes) {

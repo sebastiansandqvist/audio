@@ -11,8 +11,6 @@ import {
   Sidebar
 } from './components';
 
-// const songs = { ...songData };
-
 
 function App() {
 
@@ -35,7 +33,7 @@ function App() {
   const addNote = ({ x, pitch, duration }: Note) => {
     setSongs((songs) => {
       const updatedSong = Object.assign({}, songs[activeSongId]);
-      const existingNote = updatedSong.notes.find((note: Note) => note.x === x && note.pitch === pitch);
+      const existingNote = songs[activeSongId].notes.find((note: Note) => note.x === x && note.pitch === pitch);
       if (!existingNote) {
         const updatedNotes = [
           ...updatedSong.notes,
@@ -54,7 +52,7 @@ function App() {
   const toggleNote = ({ x, pitch, duration }: Note) => {
     setSongs((songs) => {
       const updatedSong = Object.assign({}, songs[activeSongId]);
-      const existingNote = updatedSong.notes.find((note: Note) => note.x === x && note.pitch === pitch);
+      const existingNote = songs[activeSongId].notes.find((note: Note) => note.x === x && note.pitch === pitch);
       // if there was already a note at the provided coordinates, remove it:
       if (existingNote) {
         const updatedNotes = updatedSong.notes.filter((note: Note) => note !== existingNote);
