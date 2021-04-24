@@ -3,6 +3,20 @@ declare const Wad: typeof import('web-audio-daw');
 import { Song, Note } from '../song';
 import { Instrument, instruments } from '../instrument';
 
+const pianoKeys = {
+  black: {
+    color: '#000',
+    offset: 5,
+    height: 4,
+    width: 6
+  },
+  white: {
+    color: '#fff',
+    offset: 5,
+    height: 5,
+    width: 12
+  }
+};
 
 const scale = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B'];
 const fullScale: string[] = [];
@@ -163,26 +177,12 @@ const Editor: React.FC<EditorProps> = ({ activeBeat, activeSongId, song, addNote
 
     // piano keys
     {
-      const keys = {
-        black: {
-          color: '#000',
-          offset: 5,
-          height: 4,
-          width: 6
-        },
-        white: {
-          color: '#fff',
-          offset: 5,
-          height: 5,
-          width: 12
-        }
-      };
       for (let i = 0; i < fullScale.length; i++) {
         const pitch = fullScale[i];
-        const key = (pitch.includes('#') || pitch.includes('b')) ? keys.black : keys.white;
-        ctx.fillStyle = key.color;
+        const key = (pitch.includes('#') || pitch.includes('b')) ? pianoKeys.black : pianoKeys.white;
         const x = 0;
         const y = (ROW_HEIGHT + PADDING) * (i + 1) - key.offset;
+        ctx.fillStyle = key.color;
         ctx.fillRect(x, y, key.width, key.height);
       }
     }
@@ -229,7 +229,7 @@ const Editor: React.FC<EditorProps> = ({ activeBeat, activeSongId, song, addNote
       }
     }
 
-  }, [activeSongId, song, hoveredX, hoveredY, activeBeat]);
+  }, [song, hoveredX, hoveredY, activeBeat]);
 
   return <>
     <div className="Editor">

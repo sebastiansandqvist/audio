@@ -1,7 +1,6 @@
 declare const React: typeof import('react');
 declare const ReactDOM: typeof import('react-dom');
 declare const Wad: typeof import('web-audio-daw');
-import clone from 'lodash.clonedeep';
 import { songData, Note, Song } from './song';
 import { instruments, Instrument } from './instrument';
 import {
@@ -26,18 +25,16 @@ function App() {
 
   const updateSong = (songId: string, updates: Partial<Song>) => {
     setSongs((songs) => {
-      const updatedSong = clone(songs[songId]);
-      Object.assign(updatedSong, updates);
       return {
         ...songs,
-        [updatedSong.id]: updatedSong
+        [songId]: Object.assign({}, songs[songId], updates)
       };
     })
   };
 
   const addNote = ({ x, pitch, duration }: Note) => {
     setSongs((songs) => {
-      const updatedSong = clone(songs[activeSongId]);
+      const updatedSong = Object.assign({}, songs[activeSongId]);
       const existingNote = updatedSong.notes.find((note: Note) => note.x === x && note.pitch === pitch);
       if (!existingNote) {
         const updatedNotes = [
@@ -56,7 +53,7 @@ function App() {
 
   const toggleNote = ({ x, pitch, duration }: Note) => {
     setSongs((songs) => {
-      const updatedSong = clone(songs[activeSongId]);
+      const updatedSong = Object.assign({}, songs[activeSongId]);
       const existingNote = updatedSong.notes.find((note: Note) => note.x === x && note.pitch === pitch);
       // if there was already a note at the provided coordinates, remove it:
       if (existingNote) {
