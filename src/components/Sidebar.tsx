@@ -6,10 +6,9 @@ interface SidebarProps {
   songs: { [key: string]: Song };
   activeSongId: string;
   setActiveSongId: (id: string) => void;
-  setActiveSong: (song: Song) => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ songs, activeSongId, setActiveSongId, setActiveSong }) => {
+const Sidebar: React.FC<SidebarProps> = ({ songs, activeSongId, setActiveSongId }) => {
   return <>
     <aside className="Sidebar">
       <div className="Sidebar-heading">Songs</div>
@@ -22,7 +21,6 @@ const Sidebar: React.FC<SidebarProps> = ({ songs, activeSongId, setActiveSongId,
           onClick={(event) => {
             event.preventDefault();
             setActiveSongId(songId);
-            setActiveSong(songs[songId]);
           }}
         >
             {songs[songId].title || 'Untitled'}

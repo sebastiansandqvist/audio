@@ -1,6 +1,7 @@
 declare const React: typeof import('react');
 declare const ReactDOM: typeof import('react-dom');
 declare const Wad: typeof import('web-audio-daw');
+import clone from 'lodash.clonedeep';
 import { songData, Note, Song } from './song';
 import { instruments, Instrument } from './instrument';
 import {
@@ -11,20 +12,84 @@ import {
   Sidebar
 } from './components';
 
-const songs = { ...songData };
+// const songs = { ...songData };
+
 
 function App() {
 
-  // const songs = React.useRef<{[key: string]: Song }>({ ...songData });
+  const [songs, setSongs] = React.useState<{[key: string]: Song }>({ ...songData });
   const [activeSongId, setActiveSongId] = React.useState('New Song');
-  const [activeSong, setActiveSong] = React.useState(songs[activeSongId]);
   const [activeBeat, setActiveBeat] = React.useState(-1);
   const [isPlaying, setIsPlaying] = React.useState(false);
 
+  const activeSong = songs[activeSongId];
+
   const updateSong = (songId: string, updates: Partial<Song>) => {
-    const updatedSong = Object.assign({}, songs[songId], updates);
-    songs[songId] = updatedSong;
-    setActiveSong(updatedSong);
+    setSongs((songs) => {
+      const updatedSong = clone(songs[songId]);
+      Object.assign(updatedSong, updates);
+      return {
+        ...songs,
+        [updatedSong.id]: updatedSong
+      };
+    })
+  };
+
+  const addNote = ({ x, pitch, duration }: Note) => {
+    setSongs((songs) => {
+      const updatedSong = clone(songs[activeSongId]);
+      const existingNote = updatedSong.notes.find((note: Note) => note.x === x && note.pitch === pitch);
+      if (!existingNote) {
+        const updatedNotes = [
+          ...updatedSong.notes,
+          { x, pitch, duration }
+        ];
+        Object.assign(updatedSong, { notes: updatedNotes });
+        return {
+          ...songs,
+          [updatedSong.id]: updatedSong
+        };
+      }
+      return songs;
+    });
+  };
+
+  const toggleNote = ({ x, pitch, duration }: Note) => {
+    setSongs((songs) => {
+      const updatedSong = clone(songs[activeSongId]);
+      const existingNote = updatedSong.notes.find((note: Note) => note.x === x && note.pitch === pitch);
+      // if there was already a note at the provided coordinates, remove it:
+      if (existingNote) {
+        const updatedNotes = updatedSong.notes.filter((note: Note) => note !== existingNote);
+        Object.assign(updatedSong, { notes: updatedNotes });
+        return {
+          ...songs,
+          [updatedSong.id]: updatedSong
+        };
+      }
+      // if there was not already a note at the provided coordinates, add it:
+      else {
+        const updatedNotes = [
+          ...updatedSong.notes,
+          { x, pitch, duration }
+        ];
+        Object.assign(updatedSong, { notes: updatedNotes });
+        return {
+          ...songs,
+          [updatedSong.id]: updatedSong
+        };
+      }
+      return songs;
+    });
+  };
+
+  const playPreviewNote = (pitch: string) => {
+    const instrument = instruments[activeSong.instrumentId];
+    if (!instrument) return;
+    instrument.wad.play({
+      pitch,
+      env: { hold: 0.1 }
+    });
   };
 
   const togglePlay = () => {
@@ -76,14 +141,15 @@ function App() {
       <Sidebar
         activeSongId={activeSongId}
         setActiveSongId={setActiveSongId}
-        setActiveSong={setActiveSong}
         songs={songs}
       />
       <Editor
         activeBeat={activeBeat}
         activeSongId={activeSongId}
         song={activeSong}
-        updateSong={updateSong}
+        addNote={addNote}
+        toggleNote={toggleNote}
+        playPreviewNote={playPreviewNote}
       />
       <Controls
         activeSongId={activeSongId}
